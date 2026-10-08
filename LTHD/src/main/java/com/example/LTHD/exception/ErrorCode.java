@@ -29,7 +29,12 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(
             500,
             "Lỗi hệ thống",
-            HttpStatus.INTERNAL_SERVER_ERROR);
+            HttpStatus.INTERNAL_SERVER_ERROR),
+
+    UNAUTHENTICATED(
+            400,
+            "Đăng nhập thất bại",
+            HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;
