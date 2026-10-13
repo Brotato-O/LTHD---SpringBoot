@@ -1,7 +1,14 @@
+
 package com.example.LTHD.exception;
 
 import com.example.LTHD.dto.response.ApiResponse;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,40 +33,58 @@ public class GlobalExceptionHandler {
                                 errorCode.getHttpStatus());
         }
 
-        // Bắt lỗi Validation từ @Valid
+        // Bắt lỗi Bean Validation từ @Valid
         @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<ApiResponse<Void>> handleValidationException(
+        public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationException(
                         MethodArgumentNotValidException exception) {
 
-                String message = exception.getBindingResult()
-                                .getFieldErrors()
-                                .stream()
-                                .findFirst()
-                                .map(error -> error.getDefaultMessage())
-                                .orElse("Dữ liệu đầu vào không hợp lệ");
+                Map<String, String> errors = new LinkedHashMap<>();
+
+                exception.getBindingResult().getFieldErrors().forEach(error -> errors.putIfAbsent(
+                                error.getField(),
+                                error.getDefaultMessage()));
+
+                ApiResponse<Map<String, String>> response = new ApiResponse<>(
+                                400,
+                                "Dữ liệu đầu vào không hợp lệ",
+                                errors);
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
+
+        // Bắt lỗi không có quyền truy cập
+        @ExceptionHandler(AccessDeniedException.class)
+        public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(
+                        AccessDeniedException exception) {
+
+                ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
                 ApiResponse<Void> response = new ApiResponse<>(
-                                400,
-                                message,
+                                errorCode.getCode(),
+                                errorCode.getMessage(),
                                 null);
 
                 return new ResponseEntity<>(
                                 response,
-                                org.springframework.http.HttpStatus.BAD_REQUEST);
+                                errorCode.getHttpStatus());
         }
 
-        // Bắt các lỗi không dự kiến
+        // Bắt các lỗi không được phân loại
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ApiResponse<Void>> handleException(
                         Exception exception) {
 
+                ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+
                 ApiResponse<Void> response = new ApiResponse<>(
-                                500,
-                                "Lỗi hệ thống",
+                                errorCode.getCode(),
+                                errorCode.getMessage(),
                                 null);
 
                 return new ResponseEntity<>(
                                 response,
-                                org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+                                errorCode.getHttpStatus());
         }
 }
