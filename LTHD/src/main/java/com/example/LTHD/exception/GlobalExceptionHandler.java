@@ -1,43 +1,90 @@
+
 package com.example.LTHD.exception;
 
-import com.example.LTHD.dto.ErrorResponse;
+import com.example.LTHD.dto.response.ApiResponse;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(AppException.class)
-    public ResponseEntity<ErrorResponse> handleAppException(
-            AppException ex) {
+        // Bắt các lỗi nghiệp vụ do hệ thống chủ động ném ra
+        @ExceptionHandler(AppException.class)
+        public ResponseEntity<ApiResponse<Void>> handleAppException(
+                        AppException exception) {
 
-        ErrorResponse error = new ErrorResponse(
-                ex.getErrorCode().getCode(),
-                ex.getErrorCode().getMessage(),
-                LocalDateTime.now()
-        );
+                ErrorCode errorCode = exception.getErrorCode();
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(error);
-    }
+                ApiResponse<Void> response = new ApiResponse<>(
+                                errorCode.getCode(),
+                                errorCode.getMessage(),
+                                null);
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(
-            Exception ex) {
+                return new ResponseEntity<>(
+                                response,
+                                errorCode.getHttpStatus());
+        }
 
-        ErrorResponse error = new ErrorResponse(
-                500,
-                "Đã xảy ra lỗi trong hệ thống",
-                LocalDateTime.now()
-        );
+        // Bắt lỗi Bean Validation từ @Valid
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationException(
+                        MethodArgumentNotValidException exception) {
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(error);
-    }
+                Map<String, String> errors = new LinkedHashMap<>();
+
+                exception.getBindingResult().getFieldErrors().forEach(error -> errors.putIfAbsent(
+                                error.getField(),
+                                error.getDefaultMessage()));
+
+                ApiResponse<Map<String, String>> response = new ApiResponse<>(
+                                400,
+                                "Dữ liệu đầu vào không hợp lệ",
+                                errors);
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
+
+        // Bắt lỗi không có quyền truy cập
+        @ExceptionHandler(AccessDeniedException.class)
+        public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(
+                        AccessDeniedException exception) {
+
+                ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+
+                ApiResponse<Void> response = new ApiResponse<>(
+                                errorCode.getCode(),
+                                errorCode.getMessage(),
+                                null);
+
+                return new ResponseEntity<>(
+                                response,
+                                errorCode.getHttpStatus());
+        }
+
+        // Bắt các lỗi không được phân loại
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ApiResponse<Void>> handleException(
+                        Exception exception) {
+
+                ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+
+                ApiResponse<Void> response = new ApiResponse<>(
+                                errorCode.getCode(),
+                                errorCode.getMessage(),
+                                null);
+
+                return new ResponseEntity<>(
+                                response,
+                                errorCode.getHttpStatus());
+        }
 }
