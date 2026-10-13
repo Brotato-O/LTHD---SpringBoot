@@ -20,7 +20,9 @@ public enum ErrorCode {
         UNAUTHORIZED(403, "Người dùng không có quyền truy cập", HttpStatus.FORBIDDEN),
 
         // System
-        INTERNAL_SERVER_ERROR(500, "Lỗi hệ thống", HttpStatus.INTERNAL_SERVER_ERROR);
+        INTERNAL_SERVER_ERROR(500, "Lỗi hệ thống", HttpStatus.INTERNAL_SERVER_ERROR),
+
+        PRODUCT_NOT_FOUND(404, "Không tìm thấy sản phẩm", HttpStatus.NOT_FOUND);
 
         private final int code;
         private final String message;
