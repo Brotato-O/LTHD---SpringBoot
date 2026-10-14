@@ -30,6 +30,9 @@ public class User {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Cart cart;
+
     // Constructor rỗng bắt buộc cho JPA
     public User() {
     }
@@ -75,6 +78,10 @@ public class User {
         return role;
     }
 
+    public Cart getCart() {
+        return cart;
+    }
+
     // Setter
     public void setId(Long id) {
         this.id = id;
@@ -98,5 +105,9 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
     }
 }

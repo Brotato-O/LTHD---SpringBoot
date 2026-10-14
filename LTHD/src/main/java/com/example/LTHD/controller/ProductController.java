@@ -1,8 +1,13 @@
 package com.example.LTHD.controller;
 
-import com.example.LTHD.entity.Product;
+import com.example.LTHD.dto.request.ProductCreateRequest;
+import com.example.LTHD.dto.request.ProductUpdateRequest;
+import com.example.LTHD.dto.response.ProductResponse;
 import com.example.LTHD.service.ProductService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,30 +19,39 @@ public class ProductController {
 
     private final ProductService productService;
 
+    // Lấy danh sách sản phẩm
     @GetMapping
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
+    public List<ProductResponse> getAllProducts() {
+        return productService.getProducts();
     }
 
+    // Lấy sản phẩm theo ID
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable Integer id) {
+    public ProductResponse getProductById(@PathVariable Integer id) {
         return productService.getProductById(id);
     }
 
+    // Thêm sản phẩm
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
-        return productService.createProduct(product);
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductResponse createProduct(
+            @Valid @RequestBody ProductCreateRequest request) {
+
+        return productService.createProduct(request);
     }
 
+    // Cập nhật sản phẩm
     @PutMapping("/{id}")
-    public Product updateProduct(
+    public ProductResponse updateProduct(
             @PathVariable Integer id,
-            @RequestBody Product product) {
+            @Valid @RequestBody ProductUpdateRequest request) {
 
-        return productService.updateProduct(id, product);
+        return productService.updateProduct(id, request);
     }
 
+    // Xóa sản phẩm
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(@PathVariable Integer id) {
         productService.deleteProduct(id);
     }
