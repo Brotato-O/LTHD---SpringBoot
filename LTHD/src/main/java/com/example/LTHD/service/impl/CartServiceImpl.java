@@ -53,7 +53,6 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse getCart(Long userId) {
-
         Cart cart = getOrCreateCart(userId);
 
         return cartMapper.toCartResponse(cart);

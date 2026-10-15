@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-LthdApplication<LTHD>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/LTHD",
+            "mainClass": "com.example.LTHD.LthdApplication",
+            "projectName": "LTHD",
+            "args": "",
+            "vmArgs": "-Dspring.profiles.active=dev",
+            "envFile": "${workspaceFolder}/LTHD/.env"
+        }
+    ]
+}
