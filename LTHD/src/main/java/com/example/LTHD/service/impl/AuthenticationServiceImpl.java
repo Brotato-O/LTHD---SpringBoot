@@ -75,7 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .issueTime(new Date())
                 .expirationTime(
                         new Date(Instant.now()
-                                .plus(2, ChronoUnit.MINUTES)
+                                .plus(1, ChronoUnit.HOURS)
                                 .toEpochMilli()))
 
                 .jwtID(UUID.randomUUID().toString())

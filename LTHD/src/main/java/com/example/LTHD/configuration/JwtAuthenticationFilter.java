@@ -25,153 +25,161 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final TokenBlacklistService tokenBlacklistService;
+        private final TokenBlacklistService tokenBlacklistService;
 
-    @Value("${jwt.signer-key}")
-    private String signerKey;
+        @Value("${app.security.enabled:true}")
+        private boolean securityEnabled;
 
-    public JwtAuthenticationFilter(
-            TokenBlacklistService tokenBlacklistService) {
+        @Value("${jwt.signer-key}")
+        private String signerKey;
 
-        this.tokenBlacklistService = tokenBlacklistService;
-    }
+        public JwtAuthenticationFilter(
+                        TokenBlacklistService tokenBlacklistService) {
 
-    @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
-
-        String authorization = request.getHeader("Authorization");
-
-        // Không có Authorization
-        if (authorization == null ||
-                !authorization.startsWith("Bearer ")) {
-
-            filterChain.doFilter(request, response);
-            return;
+                this.tokenBlacklistService = tokenBlacklistService;
         }
 
-        try {
-            // Lấy JWT
-            String token = authorization.substring(7);
+        @Override
+        protected void doFilterInternal(
+                        HttpServletRequest request,
+                        HttpServletResponse response,
+                        FilterChain filterChain)
+                        throws ServletException, IOException {
 
-            SignedJWT signedJWT = SignedJWT.parse(token);
+                if (!securityEnabled) {
+                        filterChain.doFilter(request, response);
+                        return;
+                }
 
-            // Kiểm tra thuật toán
-            if (!JWSAlgorithm.HS512.equals(
-                    signedJWT.getHeader().getAlgorithm())) {
+                String authorization = request.getHeader("Authorization");
 
-                response.setStatus(
-                        HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+                // Không có Authorization
+                if (authorization == null ||
+                                !authorization.startsWith("Bearer ")) {
 
-            // Kiểm tra chữ ký
-            boolean validSignature = signedJWT.verify(
-                    new MACVerifier(signerKey.getBytes()));
+                        filterChain.doFilter(request, response);
+                        return;
+                }
 
-            if (!validSignature) {
-                response.setStatus(
-                        HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+                try {
+                        // Lấy JWT
+                        String token = authorization.substring(7);
 
-            // ==============================
-            // Lấy thông tin từ JWT
-            // ==============================
+                        SignedJWT signedJWT = SignedJWT.parse(token);
 
-            String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
+                        // Kiểm tra thuật toán
+                        if (!JWSAlgorithm.HS512.equals(
+                                        signedJWT.getHeader().getAlgorithm())) {
 
-            String username = signedJWT.getJWTClaimsSet().getSubject();
+                                response.setStatus(
+                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                return;
+                        }
 
-            String role = signedJWT.getJWTClaimsSet()
-                    .getStringClaim("role");
+                        // Kiểm tra chữ ký
+                        boolean validSignature = signedJWT.verify(
+                                        new MACVerifier(signerKey.getBytes()));
 
-            Date expirationTime = signedJWT.getJWTClaimsSet()
-                    .getExpirationTime();
+                        if (!validSignature) {
+                                response.setStatus(
+                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                return;
+                        }
 
-            // ==============================
-            // Kiểm tra expiration
-            // ==============================
+                        // ==============================
+                        // Lấy thông tin từ JWT
+                        // ==============================
 
-            if (expirationTime == null ||
-                    expirationTime.before(new Date())) {
+                        String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
 
-                response.setStatus(
-                        HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+                        String username = signedJWT.getJWTClaimsSet().getSubject();
 
-            // ==============================
-            // Kiểm tra token đã logout chưa
-            // ==============================
+                        String role = signedJWT.getJWTClaimsSet()
+                                        .getStringClaim("role");
 
-            if (jwtId != null &&
-                    tokenBlacklistService.isRevoked(jwtId)) {
+                        Date expirationTime = signedJWT.getJWTClaimsSet()
+                                        .getExpirationTime();
 
-                response.setStatus(
-                        HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+                        // ==============================
+                        // Kiểm tra expiration
+                        // ==============================
 
-            // ==============================
-            // Kiểm tra username
-            // ==============================
+                        if (expirationTime == null ||
+                                        expirationTime.before(new Date())) {
 
-            if (username == null ||
-                    username.isBlank()) {
+                                response.setStatus(
+                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                return;
+                        }
 
-                response.setStatus(
-                        HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+                        // ==============================
+                        // Kiểm tra token đã logout chưa
+                        // ==============================
 
-            // ==============================
-            // Kiểm tra role
-            // ==============================
+                        if (jwtId != null &&
+                                        tokenBlacklistService.isRevoked(jwtId)) {
 
-            if (role == null ||
-                    (!role.equals("ADMIN") &&
-                            !role.equals("CUSTOMER"))) {
+                                response.setStatus(
+                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                return;
+                        }
 
-                response.setStatus(
-                        HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+                        // ==============================
+                        // Kiểm tra username
+                        // ==============================
 
-            // ==============================
-            // Chuyển role JWT thành quyền
-            // Spring Security
-            // ==============================
+                        if (username == null ||
+                                        username.isBlank()) {
 
-            List<GrantedAuthority> authorities = List.of(
-                    new SimpleGrantedAuthority(
-                            "ROLE_" + role));
+                                response.setStatus(
+                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                return;
+                        }
 
-            // ==============================
-            // Tạo Authentication
-            // ==============================
+                        // ==============================
+                        // Kiểm tra role
+                        // ==============================
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    username,
-                    null,
-                    authorities);
+                        if (role == null ||
+                                        (!role.equals("ADMIN") &&
+                                                        !role.equals("CUSTOMER"))) {
 
-            // Đưa Authentication vào SecurityContext
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(authentication);
+                                response.setStatus(
+                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                return;
+                        }
 
-        } catch (Exception e) {
+                        // ==============================
+                        // Chuyển role JWT thành quyền
+                        // Spring Security
+                        // ==============================
 
-            response.setStatus(
-                    HttpServletResponse.SC_UNAUTHORIZED);
+                        List<GrantedAuthority> authorities = List.of(
+                                        new SimpleGrantedAuthority(
+                                                        "ROLE_" + role));
 
-            return;
+                        // ==============================
+                        // Tạo Authentication
+                        // ==============================
+
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                        username,
+                                        null,
+                                        authorities);
+
+                        // Đưa Authentication vào SecurityContext
+                        SecurityContextHolder
+                                        .getContext()
+                                        .setAuthentication(authentication);
+
+                } catch (Exception e) {
+
+                        response.setStatus(
+                                        HttpServletResponse.SC_UNAUTHORIZED);
+
+                        return;
+                }
+
+                filterChain.doFilter(request, response);
         }
-
-        filterChain.doFilter(request, response);
-    }
 }

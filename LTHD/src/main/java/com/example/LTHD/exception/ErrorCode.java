@@ -22,7 +22,18 @@ public enum ErrorCode {
         // System
         INTERNAL_SERVER_ERROR(500, "Lỗi hệ thống", HttpStatus.INTERNAL_SERVER_ERROR),
 
-        PRODUCT_NOT_FOUND(404, "Không tìm thấy sản phẩm", HttpStatus.NOT_FOUND);
+        // Product
+        PRODUCT_NOT_FOUND(404, "Không tìm thấy sản phẩm", HttpStatus.NOT_FOUND),
+        PRODUCT_MODIFIED(
+                409,
+                "Sản phẩm đã được cập nhật bởi người khác. Vui lòng tải lại dữ liệu.",
+                HttpStatus.CONFLICT),
+
+        // Cart
+        CART_ITEM_NOT_FOUND(404, "Không tìm thấy sản phẩm trong giỏ", HttpStatus.NOT_FOUND),
+        CART_NOT_FOUND(404, "Không tìm thấy giỏ hàng", HttpStatus.NOT_FOUND),
+        CART_EMPTY(400, "Giỏ hàng đang trống", HttpStatus.BAD_REQUEST),
+        INSUFFICIENT_STOCK(409, "Sản phẩm không đủ tồn kho", HttpStatus.CONFLICT);
 
         private final int code;
         private final String message;
