@@ -51,7 +51,7 @@ public class CartServiceImpl implements CartService {
 
     // Xem giỏ hàng
     @Override
-    @Transactional
+    @Transactional()
     public CartResponse getCart(Long userId) {
         Cart cart = getOrCreateCart(userId);
 
@@ -112,6 +112,7 @@ public class CartServiceImpl implements CartService {
             UpdateCartItemRequest request) {
 
         Cart cart = getOrCreateCart(userId);
+
 
         CartItems item = cartItemsRepository
                 .findById(itemId)
