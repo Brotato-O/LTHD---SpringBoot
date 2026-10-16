@@ -27,7 +27,9 @@ public enum ErrorCode {
 
         // Cart
         CART_ITEM_NOT_FOUND(404, "Không tìm thấy sản phẩm trong giỏ", HttpStatus.NOT_FOUND),
-        CART_NOT_FOUND(404, "Không tìm thấy giỏ hàng", HttpStatus.NOT_FOUND);
+        CART_NOT_FOUND(404, "Không tìm thấy giỏ hàng", HttpStatus.NOT_FOUND),
+        CART_EMPTY(400, "Giỏ hàng đang trống", HttpStatus.BAD_REQUEST),
+        INSUFFICIENT_STOCK(409, "Sản phẩm không đủ tồn kho", HttpStatus.CONFLICT);
 
         private final int code;
         private final String message;
