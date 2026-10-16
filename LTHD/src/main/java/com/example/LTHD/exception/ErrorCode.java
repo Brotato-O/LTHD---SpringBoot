@@ -24,6 +24,10 @@ public enum ErrorCode {
 
         // Product
         PRODUCT_NOT_FOUND(404, "Không tìm thấy sản phẩm", HttpStatus.NOT_FOUND),
+        PRODUCT_MODIFIED(
+                409,
+                "Sản phẩm đã được cập nhật bởi người khác. Vui lòng tải lại dữ liệu.",
+                HttpStatus.CONFLICT),
 
         // Cart
         CART_ITEM_NOT_FOUND(404, "Không tìm thấy sản phẩm trong giỏ", HttpStatus.NOT_FOUND),

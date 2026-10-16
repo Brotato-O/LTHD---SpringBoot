@@ -12,6 +12,7 @@ import com.example.LTHD.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -53,10 +54,15 @@ public class ProductServiceImpl implements ProductService {
 
     // Cập nhật sản phẩm
     @Override
+    @Transactional
     public ProductResponse updateProduct(Integer id, ProductUpdateRequest request) {
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (!product.getVersion().equals(request.getVersion())) {
+            throw new AppException(ErrorCode.PRODUCT_MODIFIED);
+        }
 
         productMapper.updateProduct(product, request);
 

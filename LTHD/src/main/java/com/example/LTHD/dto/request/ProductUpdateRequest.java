@@ -26,5 +26,8 @@ public class ProductUpdateRequest {
     @PositiveOrZero(message = "Stock must be >= 0")
     private Integer stock;
 
+    @NotNull(message = "Product version is required")
+    private Long version;
+
     private String imageUrl;
 }

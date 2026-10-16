@@ -3,11 +3,13 @@ package com.example.LTHD.exception;
 
 import com.example.LTHD.dto.response.ApiResponse;
 
+import jakarta.persistence.OptimisticLockException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +17,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+        @ExceptionHandler({
+                        OptimisticLockException.class,
+                        ObjectOptimisticLockingFailureException.class
+        })
+        public ResponseEntity<ApiResponse<Void>> handleOptimisticLockException(
+                        Exception exception) {
+
+                ErrorCode errorCode = ErrorCode.PRODUCT_MODIFIED;
+
+                return ResponseEntity
+                                .status(errorCode.getHttpStatus())
+                                .body(new ApiResponse<>(
+                                                errorCode.getCode(),
+                                                errorCode.getMessage(),
+                                                null));
+        }
 
         // Bắt các lỗi nghiệp vụ do hệ thống chủ động ném ra
         @ExceptionHandler(AppException.class)

@@ -23,6 +23,11 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    //Dùng cho Optimistic locking
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
     @Column(nullable = false, length = 255)
     private String name;
 

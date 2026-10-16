@@ -15,12 +15,14 @@ public interface ProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "version", ignore = true)
     Product toProduct(ProductCreateRequest request);
 
     // ProductUpdateRequest -> Product đang tồn tại
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "version", ignore = true)
     void updateProduct(
             @MappingTarget Product product,
             ProductUpdateRequest request);

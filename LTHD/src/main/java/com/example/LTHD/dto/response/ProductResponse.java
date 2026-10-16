@@ -26,6 +26,8 @@ public class ProductResponse {
 
     private Integer stock;
 
+    private Long version;
+
     private String imageUrl;
 
     private LocalDateTime createdAt;
