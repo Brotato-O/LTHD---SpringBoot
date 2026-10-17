@@ -11,6 +11,7 @@ import com.example.LTHD.repository.ProductRepository;
 import com.example.LTHD.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     // Lấy danh sách sản phẩm
+    @Cacheable(value = "products")
     @Override
     public List<ProductResponse> getProducts() {
         return productRepository.findAll()
