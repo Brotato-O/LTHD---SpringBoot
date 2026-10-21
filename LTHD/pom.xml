@@ -20,7 +20,7 @@
     <description>Website bán hàng</description>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>21</java.version> <!-- sửa 25 thành 21 để test-->
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok.version>1.18.38</lombok.version>
         <nimbus-jose-jwt.version>10.0.2</nimbus-jose-jwt.version>
@@ -134,6 +134,14 @@
                         </path>
 
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-XX:+EnableDynamicAgentLoading</argLine>
                 </configuration>
             </plugin>
 
