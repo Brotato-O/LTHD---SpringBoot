@@ -54,6 +54,10 @@ public class SecurityConfig {
                     UsernamePasswordAuthenticationFilter.class);
         }
 
+//                .authorizeHttpRequests(auth ->
+//                        auth.anyRequest().permitAll()
+//                );
+
         return http.build();
     }
 }

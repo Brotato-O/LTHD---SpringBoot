@@ -11,6 +11,7 @@ import com.example.LTHD.repository.ProductRepository;
 import com.example.LTHD.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // Lấy sản phẩm theo ID
+    @Cacheable(value = "products", key = "#id")
     @Override
     public ProductResponse getProductById(Integer id) {
         Product product = productRepository.findById(id)
@@ -44,6 +46,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // Thêm sản phẩm
+    @CacheEvict(value = "products", key = "#id")
     @Override
     public ProductResponse createProduct(ProductCreateRequest request) {
 
