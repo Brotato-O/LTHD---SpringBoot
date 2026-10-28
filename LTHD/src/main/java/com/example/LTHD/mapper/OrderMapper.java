@@ -1,25 +1,34 @@
 package com.example.LTHD.mapper;
 
-import java.util.List;
+import com.example.LTHD.dto.response.OrderResponse;
+import com.example.LTHD.dto.response.OrderItemResponse;
+import com.example.LTHD.entity.Order;
+import com.example.LTHD.entity.OrderItems;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.example.LTHD.dto.response.OrderItemResponse;
-import com.example.LTHD.dto.response.OrderResponse;
-import com.example.LTHD.entity.Order;
-import com.example.LTHD.entity.OrderItem;
+import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { PaymentMapper.class })
 public interface OrderMapper {
 
-    @Mapping(target = "userId", source = "user.id")
-    OrderResponse toOrderResponse(Order order);
-
+    // OrderItems -> OrderItemResponse
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productName", source = "product.name")
-    OrderItemResponse toOrderItemResponse(OrderItem item);
+    OrderItemResponse toOrderItemResponse(OrderItems item);
 
+    // List<OrderItems> -> List<OrderItemResponse>
     List<OrderItemResponse> toOrderItemResponseList(
-            List<OrderItem> items);
+            List<OrderItems> items);
+
+    // Order -> OrderResponse
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "items", source = "items")
+    @Mapping(target = "payment", source = "payment")
+    OrderResponse toOrderResponse(Order order);
+
+    // List<Order> -> List<OrderResponse>
+    List<OrderResponse> toOrderResponseList(
+            List<Order> orders);
 }

@@ -25,15 +25,40 @@ public enum ErrorCode {
         // Product
         PRODUCT_NOT_FOUND(404, "Không tìm thấy sản phẩm", HttpStatus.NOT_FOUND),
         PRODUCT_MODIFIED(
-                409,
-                "Sản phẩm đã được cập nhật bởi người khác. Vui lòng tải lại dữ liệu.",
-                HttpStatus.CONFLICT),
+                        409,
+                        "Sản phẩm đã được cập nhật bởi người khác. Vui lòng tải lại dữ liệu.",
+                        HttpStatus.CONFLICT),
 
         // Cart
         CART_ITEM_NOT_FOUND(404, "Không tìm thấy sản phẩm trong giỏ", HttpStatus.NOT_FOUND),
         CART_NOT_FOUND(404, "Không tìm thấy giỏ hàng", HttpStatus.NOT_FOUND),
         CART_EMPTY(400, "Giỏ hàng đang trống", HttpStatus.BAD_REQUEST),
-        INSUFFICIENT_STOCK(409, "Sản phẩm không đủ tồn kho", HttpStatus.CONFLICT);
+
+        ORDER_NOT_FOUND(404, "Không tìm thấy đơn hàng", HttpStatus.NOT_FOUND),
+
+        ORDER_CANNOT_CANCEL(400, "Chỉ có thể hủy đơn hàng đang chờ xác nhận", HttpStatus.BAD_REQUEST),
+
+        ORDER_INVALID_STATUS(400, "Trạng thái đơn hàng không hợp lệ", HttpStatus.BAD_REQUEST),
+
+        ORDER_CANNOT_UPDATE(400, "Không thể cập nhật đơn hàng đã kết thúc", HttpStatus.BAD_REQUEST),
+
+        ORDER_ACCESS_DENIED(403, "Bạn không có quyền truy cập đơn hàng này", HttpStatus.FORBIDDEN),
+
+        // Checkout
+        INVALID_QUANTITY(400, "Số lượng sản phẩm không hợp lệ", HttpStatus.BAD_REQUEST),
+
+        INSUFFICIENT_STOCK(400, "Số lượng sản phẩm trong kho không đủ", HttpStatus.BAD_REQUEST),
+
+        INVALID_PAYMENT_METHOD(400, "Phương thức thanh toán không hợp lệ", HttpStatus.BAD_REQUEST),
+
+        // Payment
+        PAYMENT_NOT_FOUND(404, "Không tìm thấy thông tin thanh toán", HttpStatus.NOT_FOUND),
+
+        PAYMENT_ALREADY_PAID(400, "Đơn hàng đã được thanh toán", HttpStatus.BAD_REQUEST),
+
+        PAYMENT_FAILED(400, "Thanh toán thất bại", HttpStatus.BAD_REQUEST),
+
+        PAYMENT_CANNOT_CONFIRM(400, "Không thể xác nhận thanh toán cho đơn hàng này", HttpStatus.BAD_REQUEST);
 
         private final int code;
         private final String message;
