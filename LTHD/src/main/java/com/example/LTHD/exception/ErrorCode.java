@@ -18,7 +18,7 @@ public enum ErrorCode {
         // Authentication
         UNAUTHENTICATED(401, "Bạn chưa được xác thực", HttpStatus.UNAUTHORIZED),
         UNAUTHORIZED(403, "Người dùng không có quyền truy cập", HttpStatus.FORBIDDEN),
-
+        PASSWORD_WRONG(401, "Sai mật khẩu!", HttpStatus.UNAUTHORIZED),
         // System
         INTERNAL_SERVER_ERROR(500, "Lỗi hệ thống", HttpStatus.INTERNAL_SERVER_ERROR),
 
