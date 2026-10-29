@@ -53,13 +53,14 @@ class OrderServiceImplTest {
         Product product = Product.builder()
                 .id(10)
                 .price(new BigDecimal("25.50"))
+                .stock(10)
                 .build();
         Cart cart = Cart.builder().id(1L).user(new User()).build();
         cart.addItem(CartItems.builder().product(product).quantity(2).build());
         CheckoutRequest request = checkoutRequest("COD");
         Order savedOrder = new Order();
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
-        when(productRepository.findById(10)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdForUpdate(10)).thenReturn(Optional.of(product));
         when(orderRepository.saveAndFlush(any(Order.class))).thenReturn(savedOrder);
         when(orderMapper.toOrderResponse(savedOrder)).thenReturn(new OrderResponse());
 
@@ -108,11 +109,12 @@ class OrderServiceImplTest {
         Product product = Product.builder()
                 .id(10)
                 .price(new BigDecimal("25.50"))
+                .stock(10)
                 .build();
         Cart cart = Cart.builder().id(1L).user(new User()).build();
         cart.addItem(CartItems.builder().product(product).quantity(0).build());
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
-        when(productRepository.findById(10)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdForUpdate(10)).thenReturn(Optional.of(product));
 
         assertThatThrownBy(() -> orderService.checkout(1L, checkoutRequest("COD")))
                 .isInstanceOf(AppException.class)
