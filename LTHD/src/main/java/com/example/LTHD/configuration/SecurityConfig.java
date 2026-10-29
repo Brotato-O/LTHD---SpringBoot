@@ -49,7 +49,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // Authentication
-                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/auth/logout").authenticated()
 
                         // Product: cho phép xem sản phẩm
