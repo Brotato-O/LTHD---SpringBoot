@@ -4,6 +4,8 @@ package com.example.LTHD.exception;
 import com.example.LTHD.dto.response.ApiResponse;
 
 import jakarta.persistence.OptimisticLockException;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -96,7 +99,7 @@ public class GlobalExceptionHandler {
                         Exception exception) {
 
                 ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
-
+                log.error("Unhandled exception", exception);
                 ApiResponse<Void> response = new ApiResponse<>(
                                 errorCode.getCode(),
                                 errorCode.getMessage(),
