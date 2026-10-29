@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
         for (CartItems cartItem : cart.getItems()) {
 
             Product product = productRepository
-                    .findById(cartItem.getProduct().getId())
+                    .findByIdForUpdate(cartItem.getProduct().getId())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
             int quantity = cartItem.getQuantity();
@@ -74,6 +74,12 @@ public class OrderServiceImpl implements OrderService {
             if (quantity <= 0) {
                 throw new AppException(ErrorCode.INVALID_QUANTITY);
             }
+
+            if (product.getStock() < quantity) {
+                throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+            }
+
+            product.setStock(product.getStock() - quantity);
 
             // Lấy giá hiện tại từ database
             BigDecimal price = product.getPrice();
