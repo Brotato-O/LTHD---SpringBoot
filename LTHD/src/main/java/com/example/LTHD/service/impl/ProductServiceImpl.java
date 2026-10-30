@@ -46,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // Thêm sản phẩm
-    @CacheEvict(value = "products", key = "#id")
+    @CacheEvict(value = "products", allEntries = true)
     @Override
     public ProductResponse createProduct(ProductCreateRequest request) {
 

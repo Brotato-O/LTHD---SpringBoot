@@ -36,27 +36,27 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
 
-                .authorizeHttpRequests(auth -> {
-                    if (securityEnabled) {
-                        auth
-                                .requestMatchers("/api/v1/users/**").hasRole("CUSTOMER")
-                                .requestMatchers("/auth/login").permitAll()
-                                .requestMatchers("/auth/logout").authenticated()
-                                .anyRequest().authenticated();
-                    } else {
-                        auth.anyRequest().permitAll();
-                    }
-                });
+//                .authorizeHttpRequests(auth -> {
+//                    if (securityEnabled) {
+//                        auth
+//                                .requestMatchers("/api/v1/users/**").hasRole("CUSTOMER")
+//                                .requestMatchers("/auth/login").permitAll()
+//                                .requestMatchers("/auth/logout").authenticated()
+//                                .anyRequest().authenticated();
+//                    } else {
+//                        auth.anyRequest().permitAll();
+//                    }
+//                });
+//
+//        if (securityEnabled) {
+//            http.addFilterBefore(
+//                    jwtAuthenticationFilter,
+//                    UsernamePasswordAuthenticationFilter.class);
+//        }
 
-        if (securityEnabled) {
-            http.addFilterBefore(
-                    jwtAuthenticationFilter,
-                    UsernamePasswordAuthenticationFilter.class);
-        }
-
-//                .authorizeHttpRequests(auth ->
-//                        auth.anyRequest().permitAll()
-//                );
+                .authorizeHttpRequests(auth ->
+                        auth.anyRequest().permitAll()
+                );
 
         return http.build();
     }
