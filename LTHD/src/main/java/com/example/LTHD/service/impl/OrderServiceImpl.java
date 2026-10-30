@@ -3,12 +3,7 @@ package com.example.LTHD.service.impl;
 import com.example.LTHD.dto.request.CheckoutRequest;
 import com.example.LTHD.dto.response.OrderResponse;
 
-import com.example.LTHD.entity.Cart;
-import com.example.LTHD.entity.CartItems;
-import com.example.LTHD.entity.Order;
-import com.example.LTHD.entity.OrderItems;
-import com.example.LTHD.entity.Payment;
-import com.example.LTHD.entity.Product;
+import com.example.LTHD.entity.*;
 import com.example.LTHD.exception.AppException;
 import com.example.LTHD.exception.ErrorCode;
 import com.example.LTHD.mapper.OrderMapper;
@@ -58,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setUser(cart.getUser());
         order.setShippingAddress(request.getShippingAddress());
-        order.setStatus("PENDING");
+        order.setStatus(OrderStatus.PENDING);
         order.setPaymentMethod("COD");
 
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -149,13 +144,14 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = orderRepository
                 .findByIdAndUserId(orderId, userId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+                .orElseThrow(() ->
+                        new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        if (!"PENDING".equals(order.getStatus())) {
+        if (order.getStatus() != OrderStatus.PENDING) {
             throw new AppException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
 
-        order.setStatus("CANCELLED");
+        order.setStatus(OrderStatus.CANCELLED);
 
         return orderMapper.toOrderResponse(
                 orderRepository.save(order));
@@ -166,24 +162,13 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderResponse updateOrderStatus(
             Long orderId,
-            String status) {
+            OrderStatus status) {
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        Set<String> validStatuses = Set.of(
-                "PENDING",
-                "CONFIRMED",
-                "SHIPPING",
-                "COMPLETED",
-                "CANCELLED");
-
-        if (!validStatuses.contains(status)) {
-            throw new AppException(ErrorCode.ORDER_INVALID_STATUS);
-        }
-
-        if ("CANCELLED".equals(order.getStatus())
-                || "COMPLETED".equals(order.getStatus())) {
+        if (order.getStatus() == OrderStatus.CANCELLED
+                || order.getStatus() == OrderStatus.COMPLETED) {
             throw new AppException(ErrorCode.ORDER_CANNOT_UPDATE);
         }
 
