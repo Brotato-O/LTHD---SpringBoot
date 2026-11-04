@@ -32,7 +32,8 @@ public class Order {
     private String shippingAddress;
 
     @Column(nullable = false, length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     @Column(nullable = false, length = 20)
     private String paymentMethod;

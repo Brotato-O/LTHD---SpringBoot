@@ -39,6 +39,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 this.tokenBlacklistService = tokenBlacklistService;
         }
 
+        private void sendUnauthorized(HttpServletResponse response)
+                        throws IOException {
+
+                response.setStatus(401);
+                response.setContentType("application/json;charset=UTF-8");
+
+                response.getWriter().write("""
+                                {
+                                    "code": 401,
+                                    "message": "Bạn chưa được xác thực",
+                                    "data": null
+                                }
+                                """);
+        }
+
         @Override
         protected void doFilterInternal(
                         HttpServletRequest request,
@@ -71,8 +86,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         if (!JWSAlgorithm.HS512.equals(
                                         signedJWT.getHeader().getAlgorithm())) {
 
-                                response.setStatus(
-                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                sendUnauthorized(response);
                                 return;
                         }
 
@@ -81,8 +95,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                         new MACVerifier(signerKey.getBytes()));
 
                         if (!validSignature) {
-                                response.setStatus(
-                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                sendUnauthorized(response);
                                 return;
                         }
 
@@ -107,8 +120,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         if (expirationTime == null ||
                                         expirationTime.before(new Date())) {
 
-                                response.setStatus(
-                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                sendUnauthorized(response);
                                 return;
                         }
 
@@ -119,8 +131,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         if (jwtId != null &&
                                         tokenBlacklistService.isRevoked(jwtId)) {
 
-                                response.setStatus(
-                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                sendUnauthorized(response);
                                 return;
                         }
 
@@ -131,8 +142,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         if (username == null ||
                                         username.isBlank()) {
 
-                                response.setStatus(
-                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                sendUnauthorized(response);
                                 return;
                         }
 
@@ -144,8 +154,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                         (!role.equals("ADMIN") &&
                                                         !role.equals("CUSTOMER"))) {
 
-                                response.setStatus(
-                                                HttpServletResponse.SC_UNAUTHORIZED);
+                                sendUnauthorized(response);
                                 return;
                         }
 
@@ -174,12 +183,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 } catch (Exception e) {
 
-                        response.setStatus(
-                                        HttpServletResponse.SC_UNAUTHORIZED);
-
+                        sendUnauthorized(response);
                         return;
                 }
 
                 filterChain.doFilter(request, response);
         }
+
 }

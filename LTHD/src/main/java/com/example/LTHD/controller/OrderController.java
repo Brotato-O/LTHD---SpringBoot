@@ -1,6 +1,7 @@
 package com.example.LTHD.controller;
 
 import com.example.LTHD.dto.request.CheckoutRequest;
+import com.example.LTHD.dto.request.UpdateOrderStatusRequest;
 import com.example.LTHD.dto.response.OrderResponse;
 import com.example.LTHD.service.CurrentUserService;
 import com.example.LTHD.service.OrderService;
@@ -58,11 +59,11 @@ public class OrderController {
     }
 
     // Admin cập nhật trạng thái đơn hàng
-    @PutMapping("/admin/{orderId}/status")
+    @PutMapping("/admin/{orderId}")
     public OrderResponse updateOrderStatus(
             @PathVariable Long orderId,
-            @RequestParam String status) {
+            @Valid @RequestBody UpdateOrderStatusRequest request) {
 
-        return orderService.updateOrderStatus(orderId, status);
+        return orderService.updateOrderStatus(orderId, request.getStatus());
     }
 }

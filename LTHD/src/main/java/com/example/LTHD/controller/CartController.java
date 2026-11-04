@@ -2,6 +2,7 @@ package com.example.LTHD.controller;
 
 import com.example.LTHD.dto.request.AddToCartRequest;
 import com.example.LTHD.dto.request.UpdateCartItemRequest;
+import com.example.LTHD.dto.response.ApiResponse;
 import com.example.LTHD.dto.response.CartResponse;
 import com.example.LTHD.service.CartService;
 
@@ -45,18 +46,24 @@ public class CartController {
 
     // Xóa một sản phẩm khỏi giỏ hàng
     @DeleteMapping("/{userId}/items/{itemId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeCartItem(
+    public ApiResponse<Void> removeCartItem(
             @PathVariable Long userId,
             @PathVariable Integer itemId) {
 
         cartService.removeCartItem(userId, itemId);
+        return new ApiResponse<>(
+                200,
+                "Xóa vật phẩm thành công",
+                null);
     }
 
     // Xóa toàn bộ giỏ hàng
     @DeleteMapping("/{userId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void clearCart(@PathVariable Long userId) {
+    public ApiResponse<Void> clearCart(@PathVariable Long userId) {
         cartService.clearCart(userId);
+        return new ApiResponse<>(
+                200,
+                "Xóa giỏ hàng thành công",
+                null);
     }
 }

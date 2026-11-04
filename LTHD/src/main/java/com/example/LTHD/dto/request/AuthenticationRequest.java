@@ -1,7 +1,10 @@
 package com.example.LTHD.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class AuthenticationRequest {
     String email;
+    @NotBlank(message = "Password không được để trống")
     String password;
 
     public String getPassword() {

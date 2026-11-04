@@ -3,6 +3,7 @@ package com.example.LTHD.service.impl;
 import com.example.LTHD.dto.response.PaymentResponse;
 
 import com.example.LTHD.entity.Order;
+import com.example.LTHD.entity.OrderStatus;
 import com.example.LTHD.entity.Payment;
 
 import com.example.LTHD.exception.AppException;
@@ -83,15 +84,15 @@ public class PaymentServiceImpl implements PaymentService {
                 }
 
                 // Không cho thanh toán đơn đã hủy
-                if ("CANCELLED".equals(order.getStatus())) {
+                if (order.getStatus() == OrderStatus.CANCELLED) {
                         throw new AppException(
-                                        ErrorCode.PAYMENT_CANNOT_CONFIRM);
+                                ErrorCode.PAYMENT_CANNOT_CONFIRM);
                 }
 
                 // Chỉ xác nhận khi đơn hàng hoàn thành
-                if (!"COMPLETED".equals(order.getStatus())) {
+                if (order.getStatus() != OrderStatus.COMPLETED) {
                         throw new AppException(
-                                        ErrorCode.PAYMENT_CANNOT_CONFIRM);
+                                ErrorCode.PAYMENT_CANNOT_CONFIRM);
                 }
 
                 // Cập nhật thanh toán
