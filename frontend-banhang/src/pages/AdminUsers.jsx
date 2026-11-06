@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, Users, UserRound } from "lucide-react";
 import api from "../services/api";
+import AdminPagination from "../components/AdminPagination";
 
 export default function AdminUsers() {
+    const pageSize = 10;
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
     const [filterRole, setFilterRole] = useState("Tất cả");
     const [error, setError] = useState("");
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         api.get("/api/v1/users")
@@ -24,6 +27,12 @@ export default function AdminUsers() {
             .some((value) => value.toLowerCase().includes(keyword));
         return matchesSearch && (filterRole === "Tất cả" || user.role === filterRole);
     }), [users, search, filterRole]);
+    const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+    const visibleUsers = filteredUsers.slice((page - 1) * pageSize, page * pageSize);
+
+    useEffect(() => {
+        setPage(1);
+    }, [search, filterRole]);
 
     return (
         <div>
@@ -49,7 +58,7 @@ export default function AdminUsers() {
                             <tr><th className="px-5 py-4">Người dùng</th><th className="px-5 py-4">Username</th><th className="px-5 py-4">Vai trò</th></tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {filteredUsers.map((user) => (
+                            {visibleUsers.map((user) => (
                                 <tr key={user.id}>
                                     <td className="px-5 py-4"><div className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-50 text-indigo-600"><UserRound size={20} /></span><div><p className="font-bold text-slate-800">{user.fullName || user.username}</p><p className="text-xs text-slate-500">{user.email}</p></div></div></td>
                                     <td className="px-5 py-4 text-slate-600">{user.username}</td>
@@ -60,6 +69,7 @@ export default function AdminUsers() {
                     </table>
                     {filteredUsers.length === 0 && <div className="p-10 text-center text-sm text-slate-500"><Users className="mx-auto mb-3" size={28} />Không tìm thấy người dùng.</div>}
                 </div>
+                <AdminPagination page={Math.min(page, totalPages)} totalPages={totalPages} onPageChange={setPage} />
             </div>
         </div>
     );

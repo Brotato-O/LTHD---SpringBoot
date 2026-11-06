@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, ShoppingBag } from "lucide-react";
+import { toast } from "react-toastify";
 import api from "../services/api";
+import AdminPagination from "../components/AdminPagination";
 
 const formatPrice = (price) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(price) || 0);
 const statuses = ["PENDING", "CONFIRMED", "SHIPPING", "COMPLETED", "CANCELLED"];
 
 export default function AdminOrders() {
+    const pageSize = 10;
     const [orders, setOrders] = useState([]);
     const [search, setSearch] = useState("");
     const [filterStatus, setFilterStatus] = useState("Tất cả");
     const [error, setError] = useState("");
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         const loadOrders = async () => {
@@ -33,13 +37,20 @@ export default function AdminOrders() {
         return (`${order.id}`.includes(keyword) || order.customer.toLowerCase().includes(keyword)) &&
             (filterStatus === "Tất cả" || order.status === filterStatus);
     }), [orders, search, filterStatus]);
+    const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
+    const visibleOrders = filteredOrders.slice((page - 1) * pageSize, page * pageSize);
+
+    useEffect(() => {
+        setPage(1);
+    }, [search, filterStatus]);
 
     const changeStatus = async (id, status) => {
         try {
             const { data } = await api.put(`/api/orders/admin/${id}`, { status });
             setOrders((current) => current.map((order) => order.id === id ? { ...order, ...data } : order));
+            toast.success("Cập nhật trạng thái đơn hàng thành công.");
         } catch (err) {
-            window.alert(err.response?.data?.message || "Không thể cập nhật trạng thái đơn hàng.");
+            toast.error(err.response?.data?.message || "Không thể cập nhật trạng thái đơn hàng.");
         }
     };
 
@@ -59,10 +70,11 @@ export default function AdminOrders() {
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[800px] text-left text-sm">
                         <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th className="px-5 py-4">Mã đơn</th><th className="px-5 py-4">Khách hàng</th><th className="px-5 py-4">Ngày đặt</th><th className="px-5 py-4">Tổng tiền</th><th className="px-5 py-4">Trạng thái</th></tr></thead>
-                        <tbody className="divide-y divide-slate-100">{filteredOrders.map((order) => <tr key={order.id}><td className="px-5 py-4 font-bold text-indigo-600">#{order.id}</td><td className="px-5 py-4">{order.customer}</td><td className="px-5 py-4">{order.createdAt ? new Date(order.createdAt).toLocaleDateString("vi-VN") : "-"}</td><td className="px-5 py-4 font-bold">{formatPrice(order.totalAmount)}</td><td className="px-5 py-4"><select value={order.status} onChange={(e) => changeStatus(order.id, e.target.value)} className="rounded-lg border border-slate-200 px-2 py-2 text-xs">{statuses.map((status) => <option key={status}>{status}</option>)}</select></td></tr>)}</tbody>
+                        <tbody className="divide-y divide-slate-100">{visibleOrders.map((order) => <tr key={order.id}><td className="px-5 py-4 font-bold text-indigo-600">#{order.id}</td><td className="px-5 py-4">{order.customer}</td><td className="px-5 py-4">{order.createdAt ? new Date(order.createdAt).toLocaleDateString("vi-VN") : "-"}</td><td className="px-5 py-4 font-bold">{formatPrice(order.totalAmount)}</td><td className="px-5 py-4"><select value={order.status} onChange={(e) => changeStatus(order.id, e.target.value)} className="rounded-lg border border-slate-200 px-2 py-2 text-xs">{statuses.map((status) => <option key={status}>{status}</option>)}</select></td></tr>)}</tbody>
                     </table>
                     {filteredOrders.length === 0 && <div className="p-10 text-center text-sm text-slate-500"><ShoppingBag className="mx-auto mb-3" size={28} />Không tìm thấy đơn hàng.</div>}
                 </div>
+                <AdminPagination page={Math.min(page, totalPages)} totalPages={totalPages} onPageChange={setPage} />
             </div>
         </div>
     );

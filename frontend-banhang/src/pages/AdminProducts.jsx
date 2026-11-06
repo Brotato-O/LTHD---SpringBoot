@@ -1,7 +1,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Search, Pencil, Trash2, Package, X } from "lucide-react";
+import { toast } from "react-toastify";
 import api from "../services/api";
+import AdminPagination from "../components/AdminPagination";
 
 const formatPrice = (price) =>
     new Intl.NumberFormat("vi-VN", {
@@ -18,6 +20,7 @@ const emptyForm = {
 };
 
 export default function AdminProducts() {
+    const pageSize = 10;
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState("");
     const [showForm, setShowForm] = useState(false);
@@ -27,6 +30,7 @@ export default function AdminProducts() {
     const [form, setForm] = useState(emptyForm);
     const [editingId, setEditingId] = useState(null);
     const [editingVersion, setEditingVersion] = useState(null);
+    const [page, setPage] = useState(1);
 
     // Lấy danh sách sản phẩm từ database thông qua backend
     const fetchProducts = async () => {
@@ -46,6 +50,10 @@ export default function AdminProducts() {
         fetchProducts();
     }, []);
 
+    useEffect(() => {
+        setPage(1);
+    }, [search]);
+
     const filteredProducts = useMemo(
         () =>
             products.filter((product) =>
@@ -53,6 +61,8 @@ export default function AdminProducts() {
             ),
         [products, search]
     );
+    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
+    const visibleProducts = filteredProducts.slice((page - 1) * pageSize, page * pageSize);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -96,7 +106,7 @@ export default function AdminProducts() {
             form.stock === "" ||
             Number(form.stock) < 0
         ) {
-            window.alert("Vui lòng nhập tên, giá và số lượng hợp lệ.");
+            toast.error("Vui lòng nhập tên, giá và số lượng hợp lệ.");
             return;
         }
 
@@ -117,10 +127,10 @@ export default function AdminProducts() {
 
             if (editingId !== null) {
                 await api.put(`/api/products/${editingId}`, productData);
-                window.alert("Cập nhật sản phẩm thành công!");
+                toast.success("Cập nhật sản phẩm thành công!");
             } else {
                 await api.post("/api/products", productData);
-                window.alert("Thêm sản phẩm thành công!");
+                toast.success("Thêm sản phẩm thành công!");
             }
 
             setShowForm(false);
@@ -130,7 +140,7 @@ export default function AdminProducts() {
             await fetchProducts();
         } catch (err) {
             console.error("Lỗi lưu sản phẩm:", err);
-            window.alert(
+            toast.error(
                 err.response?.data?.message ||
                 "Không thể lưu sản phẩm. Hãy kiểm tra quyền Admin và dữ liệu gửi lên."
             );
@@ -149,10 +159,10 @@ export default function AdminProducts() {
             setProducts((current) =>
                 current.filter((product) => product.id !== id)
             );
-            window.alert("Xóa sản phẩm thành công!");
+            toast.success("Xóa sản phẩm thành công!");
         } catch (err) {
             console.error("Lỗi xóa sản phẩm:", err);
-            window.alert(
+            toast.error(
                 err.response?.data?.message ||
                 "Không thể xóa sản phẩm. Hãy kiểm tra quyền Admin và backend."
             );
@@ -342,7 +352,7 @@ export default function AdminProducts() {
                             </thead>
 
                             <tbody className="divide-y divide-slate-100">
-                                {filteredProducts.map((product) => (
+                                {visibleProducts.map((product) => (
                                     <tr key={product.id} className="hover:bg-slate-50">
                                         <td className="px-5 py-4">
                                             <div className="flex items-center gap-3">
@@ -408,6 +418,7 @@ export default function AdminProducts() {
                                 Không tìm thấy sản phẩm phù hợp.
                             </div>
                         )}
+                        <AdminPagination page={Math.min(page, totalPages)} totalPages={totalPages} onPageChange={setPage} />
                     </div>
                 )}
             </div>

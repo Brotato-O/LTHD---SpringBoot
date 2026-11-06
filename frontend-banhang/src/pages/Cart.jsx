@@ -1,9 +1,10 @@
 
 import { Link } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { ArrowLeft, MapPin, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { toast } from "react-toastify";
 import { useState } from "react";
 
 const formatPrice = (price) =>
@@ -22,15 +23,18 @@ export default function Cart() {
         clearCart,
     } = useCart();
     const [checkoutLoading, setCheckoutLoading] = useState(false);
+    const [shippingAddress, setShippingAddress] = useState("");
 
     const checkout = async () => {
         if (!user?.id) {
-            window.alert("Vui lòng đăng nhập trước khi đặt hàng.");
+            toast.info("Vui lòng đăng nhập trước khi đặt hàng.");
             return;
         }
 
-        const shippingAddress = window.prompt("Nhập địa chỉ giao hàng:");
-        if (!shippingAddress?.trim()) return;
+        if (!shippingAddress.trim()) {
+            toast.error("Vui lòng nhập địa chỉ giao hàng.");
+            return;
+        }
 
         try {
             setCheckoutLoading(true);
@@ -39,9 +43,10 @@ export default function Cart() {
                 paymentMethod: "COD",
             });
             await clearCart();
-            window.alert("Đặt hàng thành công!");
+            setShippingAddress("");
+            toast.success("Đặt hàng thành công!");
         } catch (error) {
-            window.alert(error.response?.data?.message || "Không thể đặt hàng.");
+            toast.error(error.response?.data?.message || "Không thể đặt hàng.");
         } finally {
             setCheckoutLoading(false);
         }
@@ -152,10 +157,34 @@ export default function Cart() {
                                 {formatPrice(totalPrice)}
                             </span>
                         </div>
+                        <div className="mt-5">
+                            <label
+                                htmlFor="shipping-address"
+                                className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-900"
+                            >
+                                <MapPin size={16} className="text-indigo-600" />
+                                Địa chỉ giao hàng
+                            </label>
+                            <textarea
+                                id="shipping-address"
+                                value={shippingAddress}
+                                onChange={(event) => setShippingAddress(event.target.value)}
+                                placeholder="Nhập địa chỉ nhận hàng của bạn"
+                                rows={3}
+                                maxLength={500}
+                                required
+                                className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                            />
+                            {!shippingAddress.trim() && (
+                                <p className="mt-1.5 text-xs text-red-500">
+                                    Vui lòng nhập địa chỉ để tiếp tục.
+                                </p>
+                            )}
+                        </div>
                         <button
                             onClick={checkout}
-                            disabled={checkoutLoading}
-                            className="mt-6 w-full rounded-xl bg-indigo-600 px-4 py-3.5 font-bold text-white hover:bg-indigo-700"
+                            disabled={checkoutLoading || !shippingAddress.trim() || !user?.id}
+                            className="mt-6 w-full rounded-xl bg-indigo-600 px-4 py-3.5 font-bold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {checkoutLoading ? "Đang đặt hàng..." : "Tiến hành đặt hàng"}
                         </button>

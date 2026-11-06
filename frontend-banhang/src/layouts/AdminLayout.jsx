@@ -1,5 +1,5 @@
 
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Navigate, Outlet, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
     Package,
@@ -24,6 +24,14 @@ export default function AdminLayout() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+
+    if (!user) {
+        return <Navigate to="/admin/login" replace />;
+    }
+
+    if (user.role !== "ADMIN") {
+        return <Navigate to="/admin/login" replace state={{ message: "Tài khoản này không có quyền quản trị." }} />;
+    }
 
     const handleLogout = () => {
         logout();
