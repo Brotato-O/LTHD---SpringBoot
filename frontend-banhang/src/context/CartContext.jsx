@@ -43,6 +43,10 @@ export function CartProvider({ children }) {
                 );
             } catch (error) {
                 console.error("Không thể tải giỏ hàng:", error);
+                if (error.response?.status === 401) {
+                    setCartItems([]);
+                    setCartId(null);
+                }
             } finally {
                 setLoading(false);
             }

@@ -9,6 +9,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
+import ProductDetail from "./pages/ProductDetail";
+import Products from "./pages/Products";
+import Profile from "./pages/Profile";
 
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
@@ -46,6 +49,9 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         {/* Khu vực quản trị */}

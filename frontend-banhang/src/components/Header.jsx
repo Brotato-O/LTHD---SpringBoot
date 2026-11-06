@@ -1,5 +1,5 @@
 
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { ShoppingCart, Store, LogOut, UserRound } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -7,6 +7,7 @@ import { useCart } from "../context/CartContext";
 export default function Header() {
     const { user, logout } = useAuth();
     const { totalItems } = useCart();
+    const location = useLocation();
 
     const linkClass = ({ isActive }) =>
         `text-sm font-medium transition ${isActive ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600"
@@ -26,6 +27,14 @@ export default function Header() {
 
                 <nav className="hidden items-center gap-7 md:flex">
                     <NavLink to="/" className={linkClass}>Trang chủ</NavLink>
+                    <NavLink
+                        to="/products"
+                        className={({ isActive }) =>
+                            linkClass({ isActive: isActive || location.pathname.startsWith("/products/") })
+                        }
+                    >
+                        Sản phẩm
+                    </NavLink>
                     <NavLink to="/orders" className={linkClass}>Đơn hàng</NavLink>
                 </nav>
 
@@ -45,10 +54,13 @@ export default function Header() {
 
                     {user ? (
                         <div className="flex items-center gap-2">
-                            <span className="hidden text-sm font-medium text-slate-700 sm:inline">
+                            <Link
+                                to="/profile"
+                                className="hidden text-sm font-medium text-slate-700 hover:text-indigo-600 sm:inline"
+                            >
                                 <UserRound className="mr-1 inline" size={16} />
                                 {user.name}
-                            </span>
+                            </Link>
                             <button
                                 onClick={logout}
                                 className="flex items-center gap-1 rounded-xl bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"

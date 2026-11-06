@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import api from "../services/api";
 
 const AuthContext = createContext(null);
@@ -50,6 +50,15 @@ export function AuthProvider({ children }) {
         }
     });
 
+    useEffect(() => {
+        const handleExpiredSession = () => setUser(null);
+        window.addEventListener("auth:expired", handleExpiredSession);
+
+        return () => {
+            window.removeEventListener("auth:expired", handleExpiredSession);
+        };
+    }, []);
+
     const login = async (username, password) => {
         const email = username.trim();
 
@@ -81,6 +90,7 @@ export function AuthProvider({ children }) {
 
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(userData));
+        api.defaults.headers.common.Authorization = "Bearer " + token;
 
         setUser(userData);
 
@@ -99,6 +109,7 @@ export function AuthProvider({ children }) {
         } finally {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
+            delete api.defaults.headers.common.Authorization;
             setUser(null);
         }
     };

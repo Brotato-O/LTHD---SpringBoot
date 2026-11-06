@@ -108,7 +108,11 @@ public class SecurityConfig {
                                                                 "/api/payments/**")
                                                 .hasRole("ADMIN")
 
-                                                // User
+                                                // Cho phép xem thông tin user theo ID
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/users/*")
+                                                .permitAll()
+
+                                                // User management
                                                 .requestMatchers("/api/v1/users", "/api/v1/users/**")
                                                 .hasRole("ADMIN")
 

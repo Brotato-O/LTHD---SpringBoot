@@ -36,7 +36,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // Lấy sản phẩm theo ID
-    @Cacheable(value = "products", key = "#id")
     @Override
     public ProductResponse getProductById(Integer id) {
         Product product = productRepository.findById(id)
@@ -46,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // Thêm sản phẩm
-    @CacheEvict(value = "products", allEntries = true)
+    @CacheEvict(value = { "products", "productById" }, allEntries = true)
     @Override
     public ProductResponse createProduct(ProductCreateRequest request) {
 
@@ -58,6 +57,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // Cập nhật sản phẩm
+    @CacheEvict(value = { "products", "productById" }, allEntries = true)
     @Override
     @Transactional
     public ProductResponse updateProduct(Integer id, ProductUpdateRequest request) {
@@ -77,6 +77,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // Xóa sản phẩm
+    @CacheEvict(value = { "products", "productById" }, allEntries = true)
     @Override
     public void deleteProduct(Integer id) {
 

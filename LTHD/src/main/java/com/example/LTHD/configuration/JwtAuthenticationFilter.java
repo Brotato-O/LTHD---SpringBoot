@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import lombok.extern.slf4j.Slf4j;
 
 import com.example.LTHD.service.TokenBlacklistService;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -23,6 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         private final TokenBlacklistService tokenBlacklistService;
@@ -86,6 +88,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         if (!JWSAlgorithm.HS512.equals(
                                         signedJWT.getHeader().getAlgorithm())) {
 
+                                log.warn("JWT rejected: unsupported algorithm");
                                 sendUnauthorized(response);
                                 return;
                         }
@@ -95,6 +98,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                         new MACVerifier(signerKey.getBytes()));
 
                         if (!validSignature) {
+                                log.warn("JWT rejected: invalid signature");
                                 sendUnauthorized(response);
                                 return;
                         }
@@ -120,6 +124,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         if (expirationTime == null ||
                                         expirationTime.before(new Date())) {
 
+                                log.warn("JWT rejected: missing or expired expiration");
                                 sendUnauthorized(response);
                                 return;
                         }
@@ -131,6 +136,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         if (jwtId != null &&
                                         tokenBlacklistService.isRevoked(jwtId)) {
 
+                                log.warn("JWT rejected: token is revoked");
                                 sendUnauthorized(response);
                                 return;
                         }
@@ -142,6 +148,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         if (username == null ||
                                         username.isBlank()) {
 
+                                log.warn("JWT rejected: missing subject");
                                 sendUnauthorized(response);
                                 return;
                         }
@@ -154,6 +161,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                         (!role.equals("ADMIN") &&
                                                         !role.equals("CUSTOMER"))) {
 
+                                log.warn("JWT rejected: invalid role");
                                 sendUnauthorized(response);
                                 return;
                         }
@@ -183,6 +191,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 } catch (Exception e) {
 
+                        log.warn("JWT rejected: cannot parse or validate token", e);
                         sendUnauthorized(response);
                         return;
                 }

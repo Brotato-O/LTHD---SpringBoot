@@ -64,12 +64,12 @@ export default function Home() {
                             và thuận tiện.
                         </p>
 
-                        <a
-                            href="#products"
-                            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 font-bold text-indigo-700 shadow-lg transition hover:bg-indigo-50"
+                        <Link
+                            to="/products"
+                            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-indigo-950 px-6 py-3.5 font-bold text-white shadow-lg transition hover:bg-indigo-900"
                         >
                             Khám phá sản phẩm <ArrowRight size={18} />
-                        </a>
+                        </Link>
                     </div>
 
                     <div className="relative hidden md:block">

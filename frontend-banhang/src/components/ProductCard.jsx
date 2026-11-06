@@ -1,6 +1,9 @@
 
 import { ShoppingCart, Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const formatPrice = (price) =>
     new Intl.NumberFormat("vi-VN", {
@@ -10,10 +13,30 @@ const formatPrice = (price) =>
 
 export default function ProductCard({ product }) {
     const { addToCart } = useCart();
+    const { user } = useAuth();
+
+    const handleAddToCart = async () => {
+        if (!user?.id) {
+            toast.info("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.");
+            return;
+        }
+
+        try {
+            await addToCart(product);
+            toast.success("Đã thêm sản phẩm vào giỏ hàng.");
+        } catch (error) {
+            console.error("Không thể thêm sản phẩm vào giỏ hàng:", error);
+            toast.error(
+                error.response?.data?.message ||
+                "Không thể thêm sản phẩm vào giỏ hàng."
+            );
+        }
+    };
 
     return (
         <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-100">
+            <Link to={`/products/${product.id}`} aria-label={`Xem ${product.name}`}>
+              <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-100">
                 <img
                     src={product.image}
                     alt={product.name}
@@ -28,7 +51,8 @@ export default function ProductCard({ product }) {
                         {product.badge}
                     </span>
                 )}
-            </div>
+              </div>
+            </Link>
 
             <div className="p-4">
                 <div className="mb-2 flex items-center gap-1 text-amber-500">
@@ -38,9 +62,12 @@ export default function ProductCard({ product }) {
                     </span>
                 </div>
 
-                <h3 className="line-clamp-1 text-base font-bold text-slate-900">
+                <Link
+                    to={`/products/${product.id}`}
+                    className="line-clamp-1 text-base font-bold text-slate-900 hover:text-indigo-700"
+                >
                     {product.name}
-                </h3>
+                </Link>
                 <p className="mt-1 min-h-10 text-sm leading-5 text-slate-500">
                     {product.description}
                 </p>
@@ -50,7 +77,7 @@ export default function ProductCard({ product }) {
                         {formatPrice(product.price)}
                     </span>
                     <button
-                        onClick={() => addToCart(product)}
+                        onClick={handleAddToCart}
                         className="flex items-center gap-2 rounded-xl bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
                     >
                         <ShoppingCart size={16} />

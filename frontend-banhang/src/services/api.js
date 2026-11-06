@@ -7,12 +7,18 @@ const api = axios.create({
     },
 });
 
+const savedToken = localStorage.getItem("token");
+if (savedToken) {
+    api.defaults.headers.common.Authorization = "Bearer " + savedToken;
+}
+
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");
 
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            const authorization = "Bearer " + token;
+            config.headers.Authorization = authorization;
         }
 
         return config;
@@ -30,6 +36,14 @@ api.interceptors.response.use((response) => {
     }
 
     return response;
+}, (error) => {
+    if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.dispatchEvent(new Event("auth:expired"));
+    }
+
+    return Promise.reject(error);
 });
 
 export default api;
