@@ -2,11 +2,15 @@ package com.example.LTHD.service;
 
 import com.example.LTHD.dto.request.ProductCreateRequest;
 import com.example.LTHD.dto.request.ProductUpdateRequest;
+import com.example.LTHD.dto.response.ProductPageResponse;
 import com.example.LTHD.dto.response.ProductResponse;
 
 import java.util.List;
 
 public interface ProductService {
+
+    //Phân trang cho danh sách sản phẩm
+    ProductPageResponse getPageProducts(int page, int size, String sort);
 
     List<ProductResponse> getProducts();
 

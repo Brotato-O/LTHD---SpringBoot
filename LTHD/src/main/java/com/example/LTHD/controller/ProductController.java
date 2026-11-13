@@ -4,6 +4,7 @@ package com.example.LTHD.controller;
 import com.example.LTHD.dto.request.ProductCreateRequest;
 import com.example.LTHD.dto.request.ProductUpdateRequest;
 import com.example.LTHD.dto.response.ApiResponse;
+import com.example.LTHD.dto.response.ProductPageResponse;
 import com.example.LTHD.dto.response.ProductResponse;
 import com.example.LTHD.service.ProductService;
 
@@ -21,74 +22,89 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductService productService;
+        private final ProductService productService;
 
-    // Lấy danh sách sản phẩm
-    @GetMapping
-    public ApiResponse<List<ProductResponse>> getAllProducts() {
+        // Phân trang cho danh sách sản phẩm
+        @GetMapping("/page")
+        public ApiResponse<ProductPageResponse> getAllPageProducts(
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "3") int size,
+                        @RequestParam(defaultValue = "asc") String sort) {
 
-        List<ProductResponse> products = productService.getProducts();
+                ProductPageResponse products = productService.getPageProducts(page, size, sort);
 
-        return new ApiResponse<>(
-                200,
-                "Lấy danh sách sản phẩm thành công",
-                products);
-    }
+                return new ApiResponse<>(
+                                200,
+                                "Lấy danh sách sản phẩm thành công",
+                                products);
+        }
 
-    // Lấy sản phẩm theo ID
-    @GetMapping("/{id}")
-    public ApiResponse<ProductResponse> getProductById(
-            @PathVariable Integer id) {
+        // Lấy danh sách sản phẩm
+        @GetMapping
+        public ApiResponse<List<ProductResponse>> getAllProducts() {
 
-        ProductResponse product = productService.getProductById(id);
+                List<ProductResponse> products = productService.getProducts();
 
-        return new ApiResponse<>(
-                200,
-                "Lấy thông tin sản phẩm thành công",
-                product);
-    }
+                return new ApiResponse<>(
+                                200,
+                                "Lấy danh sách sản phẩm thành công",
+                                products);
+        }
 
-    // Thêm sản phẩm
-    @PostMapping
-    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
-            @Valid @RequestBody ProductCreateRequest request) {
+        // Lấy sản phẩm theo ID
+        @GetMapping("/{id}")
+        public ApiResponse<ProductResponse> getProductById(
+                        @PathVariable Integer id) {
 
-        ProductResponse product = productService.createProduct(request);
+                ProductResponse product = productService.getProductById(id);
 
-        ApiResponse<ProductResponse> response = new ApiResponse<>(
-                201,
-                "Thêm sản phẩm thành công",
-                product);
+                return new ApiResponse<>(
+                                200,
+                                "Lấy thông tin sản phẩm thành công",
+                                product);
+        }
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
+        // Thêm sản phẩm
+        @PostMapping
+        public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
+                        @Valid @RequestBody ProductCreateRequest request) {
 
-    // Cập nhật sản phẩm
-    @PutMapping("/{id}")
-    public ApiResponse<ProductResponse> updateProduct(
-            @PathVariable Integer id,
-            @Valid @RequestBody ProductUpdateRequest request) {
+                ProductResponse product = productService.createProduct(request);
 
-        ProductResponse product = productService.updateProduct(id, request);
+                ApiResponse<ProductResponse> response = new ApiResponse<>(
+                                201,
+                                "Thêm sản phẩm thành công",
+                                product);
 
-        return new ApiResponse<>(
-                200,
-                "Cập nhật sản phẩm thành công",
-                product);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-    // Xóa sản phẩm
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteProduct(
-            @PathVariable Integer id) {
+        // Cập nhật sản phẩm
+        @PutMapping("/{id}")
+        public ApiResponse<ProductResponse> updateProduct(
+                        @PathVariable Integer id,
+                        @Valid @RequestBody ProductUpdateRequest request) {
 
-        productService.deleteProduct(id);
+                ProductResponse product = productService.updateProduct(id, request);
 
-        return new ApiResponse<>(
-                200,
-                "Xóa sản phẩm thành công",
-                null);
-    }
+                return new ApiResponse<>(
+                                200,
+                                "Cập nhật sản phẩm thành công",
+                                product);
+        }
+
+        // Xóa sản phẩm
+        @DeleteMapping("/{id}")
+        public ApiResponse<Void> deleteProduct(
+                        @PathVariable Integer id) {
+
+                productService.deleteProduct(id);
+
+                return new ApiResponse<>(
+                                200,
+                                "Xóa sản phẩm thành công",
+                                null);
+        }
 }
