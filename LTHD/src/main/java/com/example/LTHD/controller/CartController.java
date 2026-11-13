@@ -57,6 +57,7 @@ public class CartController {
                 null);
     }
 
+    // Xóa CartItem nhưng không xóa Cart
     // Xóa toàn bộ giỏ hàng
     @DeleteMapping("/{userId}")
     public ApiResponse<Void> clearCart(@PathVariable Long userId) {

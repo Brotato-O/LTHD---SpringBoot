@@ -2,6 +2,7 @@ package com.example.LTHD.integration;
 
 import com.example.LTHD.common.Role;
 import com.example.LTHD.entity.Order;
+import com.example.LTHD.entity.OrderStatus;
 import com.example.LTHD.entity.Payment;
 import com.example.LTHD.entity.User;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ class PaymentIntegrationTest extends IntegrationTestSupport {
                 .user(admin)
                 .totalAmount(new BigDecimal("50.00"))
                 .shippingAddress("123 Main Street")
-                .status("COMPLETED")
+                .status(OrderStatus.COMPLETED)
                 .paymentMethod("COD")
                 .build());
         Payment payment = new Payment();

@@ -5,6 +5,7 @@ import com.example.LTHD.dto.response.OrderResponse;
 import com.example.LTHD.entity.Cart;
 import com.example.LTHD.entity.CartItems;
 import com.example.LTHD.entity.Order;
+import com.example.LTHD.entity.OrderStatus;
 import com.example.LTHD.entity.Product;
 import com.example.LTHD.entity.User;
 import com.example.LTHD.exception.AppException;
@@ -70,7 +71,7 @@ class OrderServiceImplTest {
         verify(orderRepository).saveAndFlush(captor.capture());
         Order order = captor.getValue();
         assertThat(order.getTotalAmount()).isEqualByComparingTo("51.00");
-        assertThat(order.getStatus()).isEqualTo("PENDING");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
         assertThat(order.getShippingAddress()).isEqualTo("123 Main Street");
         assertThat(order.getPayment().getPaymentMethod()).isEqualTo("COD");
         assertThat(order.getPayment().getAmount()).isEqualByComparingTo("51.00");
@@ -154,20 +155,20 @@ class OrderServiceImplTest {
 
     @Test
     void cancelOrder_shouldCancelPendingOrder() {
-        Order order = Order.builder().id(5L).status("PENDING").build();
+        Order order = Order.builder().id(5L).status(OrderStatus.PENDING).build();
         when(orderRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
         when(orderMapper.toOrderResponse(order)).thenReturn(new OrderResponse());
 
         orderService.cancelOrder(1L, 5L);
 
-        assertThat(order.getStatus()).isEqualTo("CANCELLED");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
         verify(orderRepository).save(order);
     }
 
     @Test
     void cancelOrder_shouldRejectCompletedOrder() {
-        Order order = Order.builder().id(5L).status("COMPLETED").build();
+        Order order = Order.builder().id(5L).status(OrderStatus.COMPLETED).build();
         when(orderRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() -> orderService.cancelOrder(1L, 5L))
@@ -180,28 +181,15 @@ class OrderServiceImplTest {
 
     @Test
     void updateOrderStatus_shouldUpdatePendingOrder() {
-        Order order = Order.builder().id(5L).status("PENDING").build();
+        Order order = Order.builder().id(5L).status(OrderStatus.PENDING).build();
         when(orderRepository.findById(5L)).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
         when(orderMapper.toOrderResponse(order)).thenReturn(new OrderResponse());
 
-        orderService.updateOrderStatus(5L, "CONFIRMED");
+        orderService.updateOrderStatus(5L, OrderStatus.CONFIRMED);
 
-        assertThat(order.getStatus()).isEqualTo("CONFIRMED");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
         verify(orderRepository).save(order);
-    }
-
-    @Test
-    void updateOrderStatus_shouldRejectInvalidStatus() {
-        Order order = Order.builder().id(5L).status("PENDING").build();
-        when(orderRepository.findById(5L)).thenReturn(Optional.of(order));
-
-        assertThatThrownBy(() -> orderService.updateOrderStatus(5L, "UNKNOWN"))
-                .isInstanceOf(AppException.class)
-                .extracting("errorCode")
-                .isEqualTo(ErrorCode.ORDER_INVALID_STATUS);
-
-        verify(orderRepository, never()).save(order);
     }
 
     private CheckoutRequest checkoutRequest(String paymentMethod) {

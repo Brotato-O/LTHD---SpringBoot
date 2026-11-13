@@ -2,6 +2,7 @@ package com.example.LTHD.integration;
 
 import com.example.LTHD.common.Role;
 import com.example.LTHD.entity.Order;
+import com.example.LTHD.entity.OrderStatus;
 import com.example.LTHD.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -25,7 +26,7 @@ class OrderIntegrationTest extends IntegrationTestSupport {
                 .user(user)
                 .totalAmount(new BigDecimal("75.00"))
                 .shippingAddress("123 Main Street")
-                .status("PENDING")
+                .status(OrderStatus.PENDING)
                 .paymentMethod("COD")
                 .build());
         String token = login(user, CUSTOMER_PASSWORD);
@@ -48,7 +49,7 @@ class OrderIntegrationTest extends IntegrationTestSupport {
                 .user(owner)
                 .totalAmount(new BigDecimal("30.00"))
                 .shippingAddress("456 Main Street")
-                .status("PENDING")
+                .status(OrderStatus.PENDING)
                 .paymentMethod("COD")
                 .build());
         String token = login(otherUser, CUSTOMER_PASSWORD);
@@ -67,7 +68,7 @@ class OrderIntegrationTest extends IntegrationTestSupport {
                 .user(user)
                 .totalAmount(new BigDecimal("45.00"))
                 .shippingAddress("789 Main Street")
-                .status("PENDING")
+                .status(OrderStatus.PENDING)
                 .paymentMethod("COD")
                 .build());
         String token = login(user, CUSTOMER_PASSWORD);
@@ -80,6 +81,6 @@ class OrderIntegrationTest extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
 
         assertThat(orderRepository.findById(order.getId()).orElseThrow().getStatus())
-                .isEqualTo("CANCELLED");
+                .isEqualTo(OrderStatus.CANCELLED);
     }
 }

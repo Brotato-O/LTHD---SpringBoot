@@ -1,6 +1,7 @@
 package com.example.LTHD.service;
 
 import com.example.LTHD.entity.Order;
+import com.example.LTHD.entity.OrderStatus;
 import com.example.LTHD.entity.Payment;
 import com.example.LTHD.dto.response.PaymentResponse;
 import com.example.LTHD.exception.AppException;
@@ -39,7 +40,7 @@ class PaymentServiceImplTest {
 
     @Test
     void confirmCODPayment_shouldMarkCompletedOrderAsPaid() {
-        Order order = Order.builder().id(1L).status("COMPLETED").build();
+        Order order = Order.builder().id(1L).status(OrderStatus.COMPLETED).build();
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentMethod("COD");
@@ -57,7 +58,7 @@ class PaymentServiceImplTest {
 
     @Test
     void confirmCODPayment_shouldRejectNonCodPayment() {
-        Order order = Order.builder().id(1L).status("COMPLETED").build();
+        Order order = Order.builder().id(1L).status(OrderStatus.COMPLETED).build();
         Payment payment = new Payment();
         payment.setPaymentMethod("VNPAY");
         payment.setStatus("UNPAID");
@@ -75,7 +76,7 @@ class PaymentServiceImplTest {
 
     @Test
     void confirmCODPayment_shouldRejectCancelledOrder() {
-        Order order = Order.builder().id(1L).status("CANCELLED").build();
+        Order order = Order.builder().id(1L).status(OrderStatus.CANCELLED).build();
         Payment payment = new Payment();
         payment.setPaymentMethod("COD");
         payment.setStatus("UNPAID");
@@ -105,7 +106,7 @@ class PaymentServiceImplTest {
 
     @Test
     void confirmCODPayment_shouldRejectMissingPayment() {
-        Order order = Order.builder().id(1L).status("COMPLETED").build();
+        Order order = Order.builder().id(1L).status(OrderStatus.COMPLETED).build();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findByOrderId(1L)).thenReturn(Optional.empty());
 
@@ -119,7 +120,7 @@ class PaymentServiceImplTest {
 
     @Test
     void confirmCODPayment_shouldRejectIncompleteOrder() {
-        Order order = Order.builder().id(1L).status("SHIPPING").build();
+        Order order = Order.builder().id(1L).status(OrderStatus.SHIPPING).build();
         Payment payment = new Payment();
         payment.setPaymentMethod("COD");
         payment.setStatus("UNPAID");
@@ -136,7 +137,7 @@ class PaymentServiceImplTest {
 
     @Test
     void confirmCODPayment_shouldRejectAlreadyPaidPayment() {
-        Order order = Order.builder().id(1L).status("COMPLETED").build();
+        Order order = Order.builder().id(1L).status(OrderStatus.COMPLETED).build();
         Payment payment = new Payment();
         payment.setPaymentMethod("COD");
         payment.setStatus("PAID");
